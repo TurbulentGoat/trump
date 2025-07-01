@@ -3,10 +3,9 @@ import json
 import re
 import os
 from datetime import datetime
-import time   # <--- ADDED
-import random # <--- ADDED
-
-# --- NEW: Import libraries for plotting ---
+import time
+import random
+# --- Import libraries for plotting ---
 try:
     import matplotlib.pyplot as plt
     from collections import Counter
@@ -35,7 +34,7 @@ class Colors:
     UNDERLINE = '\033[4m'
     DIM = '\033[2m'
 
-# --- NEW: List of User-Agents to rotate through ---
+# --- List of User-Agents to rotate through ---
 USER_AGENTS = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36',
@@ -44,7 +43,7 @@ USER_AGENTS = [
     'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
 ]
 
-# --- ASCII Art Generation (Unchanged) ---
+# --- ASCII Art Generation ---
 def rgb_to_ansi(r, g, b):
     if r == g and g == b:
         if r < 8: return 16
@@ -53,7 +52,7 @@ def rgb_to_ansi(r, g, b):
     return 16 + (36 * round(r / 255 * 5)) + (6 * round(g / 255 * 5)) + round(b / 255 * 5)
 def display_ascii_art():
     if not Image: return
-    IMAGE_PATH, MAX_WIDTH = "trump_blocky.png", 50
+    IMAGE_PATH, MAX_WIDTH = "trump_blocky.png", 50 #CHANGE IMAGE & IMAGE WIDTH HERE IF WANTED
     if not os.path.exists(IMAGE_PATH): return
     CACHE_PATH = f"ascii_art_halfblock_w{MAX_WIDTH}.txt"
     if os.path.exists(CACHE_PATH):
@@ -65,7 +64,7 @@ def display_ascii_art():
     try:
         img = Image.open(IMAGE_PATH)
         width, height = img.size
-        new_height = int((height / width) * MAX_WIDTH * 0.9)
+        new_height = int((height / width) * MAX_WIDTH * 0.9) #CHANGE IMAGE HEIGHT HERE IF WANTED
         if new_height % 2 != 0: new_height -= 1
         resized_img = img.resize((MAX_WIDTH, new_height), resample=Image.Resampling.LANCZOS).convert("RGB")
         ascii_lines = []
@@ -81,7 +80,7 @@ def display_ascii_art():
         print(full_art)
     except Exception as e: print(f"{Colors.FAIL}Could not generate ASCII art: {e}{Colors.ENDC}")
 
-# --- Core Data Processing (Unchanged) ---
+# --- Core Data Processing ---
 def process_and_save_data(raw_posts, mode='overwrite'):
     if not raw_posts:
         print(f"{Colors.WARNING}No new posts to process.{Colors.ENDC}")
@@ -125,7 +124,7 @@ def update_stats_history(raw_posts):
     with open("stats_history.json", "w") as f: json.dump(history, f, indent=2)
     print(f"{Colors.OKCYAN}✔ Stat history updated.{Colors.ENDC}")
 
-# --- Fetching Logic (MODIFIED) ---
+# --- Fetching Logic ---
 def fetch_posts(scraper, url, get_headers=False):
     scraper.headers['User-Agent'] = random.choice(USER_AGENTS)
     time.sleep(random.uniform(0.5, 1.5))
