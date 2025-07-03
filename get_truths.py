@@ -3,10 +3,10 @@ import json
 import re
 import os
 from datetime import datetime
-import time   # <--- ADDED
-import random # <--- ADDED
+import time
+import random
 
-# --- NEW: Import libraries for plotting ---
+# --- Import libraries for plotting ---
 try:
     import matplotlib.pyplot as plt
     from collections import Counter
@@ -35,7 +35,7 @@ class Colors:
     UNDERLINE = '\033[4m'
     DIM = '\033[2m'
 
-# --- NEW: List of User-Agents to rotate through ---
+# --- List of User-Agents to rotate through ---
 USER_AGENTS = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36',
@@ -44,7 +44,7 @@ USER_AGENTS = [
     'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
 ]
 
-# --- ASCII Art Generation (Unchanged) ---
+# --- ASCII Art Generation ---
 def rgb_to_ansi(r, g, b):
     if r == g and g == b:
         if r < 8: return 16
@@ -81,7 +81,7 @@ def display_ascii_art():
         print(full_art)
     except Exception as e: print(f"{Colors.FAIL}Could not generate ASCII art: {e}{Colors.ENDC}")
 
-# --- Core Data Processing (Unchanged) ---
+# --- Core Data Processing ---
 def process_and_save_data(raw_posts, mode='overwrite'):
     if not raw_posts:
         print(f"{Colors.WARNING}No new posts to process.{Colors.ENDC}")
@@ -125,7 +125,7 @@ def update_stats_history(raw_posts):
     with open("stats_history.json", "w") as f: json.dump(history, f, indent=2)
     print(f"{Colors.OKCYAN}✔ Stat history updated.{Colors.ENDC}")
 
-# --- Fetching Logic (MODIFIED) ---
+# --- Fetching Logic ---
 def fetch_posts(scraper, url, get_headers=False):
     scraper.headers['User-Agent'] = random.choice(USER_AGENTS)
     time.sleep(random.uniform(0.5, 1.5))
@@ -188,7 +188,7 @@ def fetch_more_posts():
     data = fetch_posts(scraper, api_url)
     if data: process_and_save_data(data, mode='append')
 
-# --- UI and Display Logic (Unchanged functions) ---
+# --- UI and Display Logic ---
 def strip_html(text): return re.sub('<[^<]+?>', '', text)
 def display_post(post):
     print(f"{Colors.DIM}--------------------------------------------------{Colors.ENDC}")
@@ -291,6 +291,54 @@ def check_connection_status():
         print(f"{Colors.FAIL}❌ A network error occurred. Check your internet connection.{Colors.ENDC}")
         print(f"{Colors.DIM}{e}{Colors.ENDC}")
 
+def show_new_posts_since_last_check():
+    if not os.path.exists('truths.json'):
+        print(f"{Colors.WARNING}No local post data found. Fetch some posts first.{Colors.ENDC}")
+        return
+    try:
+        with open('truths.json', 'r') as f:
+            posts = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        print(f"{Colors.WARNING}Could not read truths.json.{Colors.ENDC}")
+        return
+    if not posts:
+        print(f"{Colors.WARNING}No posts found in truths.json.{Colors.ENDC}")
+        return
+
+    # Track last check timestamp in a file
+    last_check_file = ".last_check"
+    last_check_time = None
+    if os.path.exists(last_check_file):
+        with open(last_check_file, 'r') as f:
+            last_check_time = f.read().strip()
+    # If never checked before, show nothing
+    if not last_check_time:
+        print(f"{Colors.OKCYAN}No previous check found. All posts are considered old.{Colors.ENDC}")
+        with open(last_check_file, 'w') as f:
+            f.write(datetime.now().isoformat())
+        return
+
+    # Find new posts since last check
+    new_posts = [p for p in posts if p.get("created_at", "") > last_check_time]
+    if not new_posts:
+        print(f"{Colors.OKCYAN}No new posts since your last check!{Colors.ENDC}")
+    else:
+        if len(new_posts) > 10:
+            print(f"{Colors.WARNING}There are {len(new_posts)} new posts since your last check.{Colors.ENDC}")
+            confirm = input("Show all new posts? (y/N): ").strip().lower()
+            if confirm != 'y':
+                print(f"{Colors.DIM}Returning to main menu...{Colors.ENDC}")
+                with open(last_check_file, 'w') as f:
+                    f.write(datetime.now().isoformat())
+                return
+        print(f"{Colors.OKGREEN}Showing {len(new_posts)} new post(s) since your last check:{Colors.ENDC}")
+        # Show from oldest to newest
+        for post in sorted(new_posts, key=lambda p: p.get("created_at", "")):
+            display_post(post)
+    # Update last check time
+    with open(last_check_file, 'w') as f:
+        f.write(datetime.now().isoformat())
+
 def main_menu():
     display_ascii_art()
     smart_update()
@@ -302,7 +350,8 @@ def main_menu():
         print("4. View Overall Stats & Records")
         print(f"5. Analyze Posting Trends {Colors.OKBLUE}[NEW]{Colors.ENDC}")
         print("6. Check Connection Status")
-        print("7. Exit")
+        print("7. Show New Posts Since Last Check")
+        print("8. Exit")
         choice = input("> ").strip()
         if choice == '1': search_posts()
         elif choice == '2': fetch_more_posts()
@@ -310,7 +359,8 @@ def main_menu():
         elif choice == '4': show_stats_and_records()
         elif choice == '5': analyze_posting_trends()
         elif choice == '6': check_connection_status()
-        elif choice == '7': break
+        elif choice == '7': show_new_posts_since_last_check()
+        elif choice == '8': break
         else: print(f"{Colors.FAIL}Invalid choice.{Colors.ENDC}")
 
 if __name__ == "__main__":
