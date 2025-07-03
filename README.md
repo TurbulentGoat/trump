@@ -10,9 +10,15 @@ This  program fetches, archives, and analyses posts ("Truths") from Donald Trump
 - Tracks follower and post counts over time.
 - Provides search, stats, and trend analysis with easy-to-use menus.
 - Visualizes posting frequency and follower growth.
-- A cartoon/pixel art of Trump is included for fun!
-- If you do not want the cartoon Trump to show in the terminal, I have included get_truths_no_logo.py which does not include the cartoon Trump.
 - Easy to run with Python 3.x.
+- A cartoon/pixel art of Trump is included for fun!
+- If you do not want the cartoon Trump to show in the terminal. If you don't want the trump cartoon, comment out display_ascii_art() at the main_menu function:  
+    <code>
+    def main_menu():  
+        #display_ascii_art()  
+        smart_update()
+    </code>
+
 
 ![Cartoon Trump](Trump.png)
 
