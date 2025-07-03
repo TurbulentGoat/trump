@@ -348,7 +348,7 @@ def main_menu():
         print(f"2. Fetch More Posts {Colors.DIM}(Go Back in Time){Colors.ENDC}")
         print(f"3. Refresh & Overwrite All {Colors.DIM}(Start Fresh){Colors.ENDC}")
         print("4. View Overall Stats & Records")
-        print(f"5. Analyze Posting Trends {Colors.OKBLUE}[NEW]{Colors.ENDC}")
+        print("5. Analyze Posting Trends")
         print("6. Check Connection Status")
         print("7. Show New Posts Since Last Check")
         print("8. Exit")
